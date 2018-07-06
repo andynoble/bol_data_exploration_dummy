@@ -15,6 +15,7 @@ for t in table_list:
     cursor.execute(sql)
 db.commit()
 
+# Local file to process
 f = open(r'C:\Users\andy.noble\Desktop\BOL Data\ACEFOI.20170102.txt')
 
 line_count: int = 0
