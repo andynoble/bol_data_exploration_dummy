@@ -2,7 +2,9 @@ import sqlite3
 import datetime
 
 # Local file to process
-f = open(r'C:\Users\andy.noble\Desktop\BOL Data\ACEFOI.20170102.txt')
+f = open(r"C:\Users\andy.noble\Desktop\BOL Data\ACEFOI.20170102.txt")
+trunc_data = 'Y'
+
 
 # Purely for output to give some sense that something is happening
 line_count = 0
@@ -10,7 +12,7 @@ line_count = 0
 #   Each BOL set starts with an ID row and subsequent rows need to be linked
 #   Only update this ID at each Record ID row in the source data
 genscapeid = 0
-db = sqlite3.connect(r'C:\SQLite\bol.db')
+db = sqlite3.connect(r"C:\SQLite\bol.db")
 
 # Define the column widths for different record types in the file
 def get_boltype (in_rectype):
@@ -73,11 +75,12 @@ print('Started at: '+str(t1))
 cursor = db.cursor()
 
 # Prepare database
-table_list = ['00', '10', '20', '30', '40', '50', '60', '61', '62', '70', '71', '80']
-for t in table_list:
-    sql = 'DELETE FROM type' + t
-    cursor.execute(sql)
-db.commit()
+if trunc_data == 'Y':
+    table_list = ['00', '10', '20', '30', '40', '50', '60', '61', '62', '70', '71', '80']
+    for t in table_list:
+        sql = 'DELETE FROM type' + t
+        cursor.execute(sql)
+    db.commit()
 
 for line in f:
     # Get record type
@@ -88,7 +91,7 @@ for line in f:
     i = 0
     value_list = [genscapeid]
     for sep in separators:
-        value_list.append(line[start_sep:sep])
+        value_list.append(line[start_sep:sep].strip())
         i += 1
         start_sep = sep
 
