@@ -2,17 +2,15 @@ import sqlite3
 import datetime
 
 # Local file to process
-f = open(r"C:\Users\andy.noble\Desktop\BOL Data\ACEFOI.20170102.txt")
-trunc_data = 'Y'
-
+f = open(r"C:\Users\andy.noble\Desktop\BOL Data\ACEFOI.20170103.txt")
+trunc_data = 'N'
 
 # Purely for output to give some sense that something is happening
 line_count = 0
-# Genscape ID
-#   Each BOL set starts with an ID row and subsequent rows need to be linked
-#   Only update this ID at each Record ID row in the source data
-genscapeid = 0
+
+# Create database connection and cursor
 db = sqlite3.connect(r"C:\SQLite\bol.db")
+cursor = db.cursor()
 
 # Define the column widths for different record types in the file
 def get_boltype (in_rectype):
@@ -67,12 +65,9 @@ def get_boltype (in_rectype):
 
     return out_separators
 
-
 # Start
 t1 = datetime.datetime.now()
 print('Started at: '+str(t1))
-
-cursor = db.cursor()
 
 # Prepare database
 if trunc_data == 'Y':
@@ -81,6 +76,16 @@ if trunc_data == 'Y':
         sql = 'DELETE FROM type' + t
         cursor.execute(sql)
     db.commit()
+    # Genscape ID
+    #   Each BOL set starts with an ID row and subsequent rows need to be linked
+    #   Only update this ID at each Record ID row in the source data
+    #   If truncating the tables, set this to 0
+    genscapeid = 0
+else:
+    #   If not truncating the tables, get the latest value from the DB
+    sql = 'SELECT max(gen_id) FROM type00'
+    cursor.execute(sql)
+    genscapeid = cursor.fetchone()[0]
 
 for line in f:
     # Get record type
