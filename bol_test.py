@@ -2,8 +2,8 @@ import sqlite3
 import datetime
 
 # Local file to process
-f = open(r"C:\Users\andy.noble\Desktop\BOL Data\ACEFOI.20170103.txt")
-trunc_data = 'N'
+f = open(r"C:\Users\andy.noble\Desktop\BOL Data\ACEFOI.20170102.txt")
+trunc_data = 'Y'
 
 # Purely for output to give some sense that something is happening
 line_count = 0
@@ -102,7 +102,15 @@ for line in f:
 
     var_string = ', '.join('?' * len(value_list))
     sql = 'INSERT INTO type' + rectype + ' VALUES (%s)' % var_string
-    cursor.execute(sql, value_list)
+    try:
+        cursor.execute(sql, value_list)
+    except sqlite3.IntegrityError as e:
+        auditsql = 'INSERT INTO type00_deletes SELECT * FROM type00 WHERE col2 = ? AND col3 = ?'
+        delsql = 'DELETE FROM type00 WHERE col2 = ? AND col3 = ?'
+        delvalue_list = value_list[2:4]
+        cursor.execute(auditsql, delvalue_list)
+        cursor.execute(delsql, delvalue_list)
+        cursor.execute(sql, value_list)
     line_count += 1
     if line_count % 5000 == 0:
         print(line_count)
